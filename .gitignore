@@ -1,0 +1,66 @@
+# Gradle
+.gradle/
+build/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Log/OS/IDE
+*.log
+*.swp
+*.swo
+.idea/
+*.iml
+.DS_Store
+
+# Android Studio
+.cxx/
+captures/
+.externalNativeBuild/
+.gradle/
+.idea/
+*.iml
+.gradle/
+out/
+*.hprof
+
+# Keystore files
+*.jks
+*.keystore
+
+# Proguard
+proguard/
+proguard-rules.pro~
+
+# Miscellaneous
+*.apk
+*.ap_
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Generated files
+gen/
+bin/
+obj/
+tmp/
+*.class
+
+# IntelliJ
+*.ipr
+*.iws
+*.idea/
+*.iml
+
+# Mac OS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# NDK
+obj/
+
