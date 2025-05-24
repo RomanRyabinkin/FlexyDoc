@@ -1,43 +1,31 @@
 package com.example.flexydoc.ui.screen.settings
 
+import android.app.Application
 import androidx.annotation.StringRes
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.flexydoc.R
-import kotlinx.coroutines.flow.*
+import com.example.flexydoc.data.settings.PreferencesRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/**
- * Перечисление доступных тем приложения.
- * @property labelRes Ресурс строки с названием темы.
- */
-
+/** Варианты темы с ресурсами для лейблов */
 enum class ThemeOption(@StringRes val labelRes: Int) {
     Light(R.string.theme_light),
     Dark(R.string.theme_dark),
     System(R.string.theme_system)
 }
 
-/**
- * Перечисление доступных языков приложения.
- * @property labelRes Ресурс строки с названием языка.
- */
-
+/** Варианты языка с ресурсами для лейблов */
 enum class LanguageOption(@StringRes val labelRes: Int) {
     Russian(R.string.lang_russian),
     English(R.string.lang_english)
 }
 
-
-/**
- * Состояние экрана настроек.
- *
- * @property currentTheme Текущий выбранный вариант темы.
- * @property themeOptions Список всех доступных тем.
- * @property currentLanguage Текущий выбранный язык интерфейса.
- * @property languageOptions Список всех доступных языков.
- */
-
+/** UI-состояние экрана настроек */
 data class SettingsUiState(
     val currentTheme: ThemeOption = ThemeOption.System,
     val themeOptions: List<ThemeOption> = ThemeOption.values().toList(),
@@ -45,31 +33,48 @@ data class SettingsUiState(
     val languageOptions: List<LanguageOption> = LanguageOption.values().toList()
 )
 
-/**[ViewModel] для экрана настроек. Хранит и управляет [SettingsUiState].*/
-class SettingsViewModel : ViewModel() {
+/**
+ * ViewModel экрана настроек.
+ * На старте подгружает сохранённое значение темы из DataStore,
+ * при изменениях сохраняет новое значение и обновляет [SettingsUiState].
+ */
+
+class SettingsViewModel(application: Application) : AndroidViewModel(application) {
+    private val repo = PreferencesRepository(application)
+
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
-    /**
-     * Обработчик выбора новой темы.
-     * @param option Выбранный вариант темы.
-     */
-    fun onThemeSelected(option: ThemeOption) {
+    init {
+        // Подписка на поток из DataStore
         viewModelScope.launch {
-            _uiState.update { it.copy(currentTheme = option) }
-            // repo.saveTheme(option)
+            repo.themeOptionFlow.collect { storedName ->
+                // Попытка спарсить имя в enum; по умолчанию System
+                val theme = runCatching { ThemeOption.valueOf(storedName) }
+                    .getOrDefault(ThemeOption.System)
+                _uiState.update { it.copy(currentTheme = theme) }
+            }
         }
     }
 
     /**
-     * Обработчик выбора нового языка.
-     * @param option Выбранный вариант языка.
+     * Обработчик выбора новой темы в UI.
+     * Сохраняет её в DataStore и обновляет локальное состояние.
      */
+    fun onThemeSelected(option: ThemeOption) {
+        viewModelScope.launch {
+            repo.setThemeOption(option.name)
+            _uiState.update { it.copy(currentTheme = option) }
+        }
+    }
 
+    /**
+     * Обработчик выбора языка. Пока никак не сохраняет —
+     * просто обновляет UI-состояние.
+     */
     fun onLanguageSelected(option: LanguageOption) {
         viewModelScope.launch {
             _uiState.update { it.copy(currentLanguage = option) }
-            // repo.saveLanguage(option)
         }
     }
 }

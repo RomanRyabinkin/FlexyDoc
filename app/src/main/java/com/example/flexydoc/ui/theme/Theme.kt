@@ -1,58 +1,60 @@
+// ui/theme/Theme.kt
 package com.example.flexydoc.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import com.example.flexydoc.ui.screen.settings.ThemeOption
+import com.example.flexydoc.ui.theme.Shapes
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
+    primary   = Purple80,
     secondary = PurpleGrey80,
-    tertiary = Pink80
+    tertiary  = Pink80
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
+    primary   = Purple40,
     secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    tertiary  = Pink40
 )
+
+/**
+ * Корневая тема приложения.
+ * @param themeOption Выбранная пользователем тема (Light, Dark или System).
+ * @param dynamicColor Включить динамические цвета (Material You) на Android 12+.
+ * @param content     Компонент, которому будет применена тема.
+ */
 
 @Composable
 fun FlexyDocTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
+    themeOption: ThemeOption,
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
+    // если пользователь выбрал «System», то учитывается системный режим,
+    // иначе — принудительно светлая/тёмная
+    val useDarkTheme: Boolean = when (themeOption) {
+        ThemeOption.Light  -> false
+        ThemeOption.Dark   -> true
+        ThemeOption.System -> isSystemInDarkTheme()
+    }
 
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+    // динамические цвета на Android 12+
+    val colorScheme = if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        val context = LocalContext.current
+        if (useDarkTheme) dynamicDarkColorScheme(context)
+        else dynamicLightColorScheme(context)
+    } else {
+        if (useDarkTheme) DarkColorScheme else LightColorScheme
     }
 
     MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
+        colorScheme  = colorScheme,
+        typography   = Typography,
+        shapes       = Shapes,
+        content      = content
     )
 }
