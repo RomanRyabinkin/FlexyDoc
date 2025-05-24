@@ -17,7 +17,6 @@ import com.example.flexydoc.R
 fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel()
 ) {
-    // делегат getValue нужен для by
     val uiState by viewModel.uiState.collectAsState()
 
     Column(
@@ -30,16 +29,15 @@ fun SettingsScreen(
             text = stringResource(R.string.settings_title),
             style = MaterialTheme.typography.titleLarge
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(Modifier.height(16.dp))
 
         // 1. Тема приложения
         Text(
             text = stringResource(R.string.theme_label),
             style = MaterialTheme.typography.titleMedium
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(Modifier.height(8.dp))
 
-        // список из ThemeOption
         uiState.themeOptions.forEach { option ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -49,28 +47,28 @@ fun SettingsScreen(
                     selected = uiState.currentTheme == option,
                     onClick = { viewModel.onThemeSelected(option) }
                 )
+                Spacer(Modifier.width(8.dp))
                 Text(
-                    text = option.label,
-                    modifier = Modifier.padding(start = 8.dp)
+                    text = stringResource(option.labelRes),
+                    style = MaterialTheme.typography.bodyLarge
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(Modifier.height(24.dp))
 
         // 2. Язык приложения
         Text(
             text = stringResource(R.string.language_label),
             style = MaterialTheme.typography.titleMedium
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(Modifier.height(8.dp))
 
-        // делегат setValue и remember
         var expanded by remember { mutableStateOf(false) }
 
         Box {
             OutlinedButton(onClick = { expanded = true }) {
-                Text(text = uiState.currentLanguage.displayName)
+                Text(text = stringResource(uiState.currentLanguage.labelRes))
             }
             DropdownMenu(
                 expanded = expanded,
@@ -78,7 +76,7 @@ fun SettingsScreen(
             ) {
                 uiState.languageOptions.forEach { lang ->
                     DropdownMenuItem(
-                        text = { Text(lang.displayName) },
+                        text = { Text(stringResource(lang.labelRes)) },
                         onClick = {
                             viewModel.onLanguageSelected(lang)
                             expanded = false

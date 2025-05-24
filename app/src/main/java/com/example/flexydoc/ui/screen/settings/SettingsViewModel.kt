@@ -1,24 +1,25 @@
 package com.example.flexydoc.ui.screen.settings
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.flexydoc.R
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 // Варианты тем приложения
-enum class ThemeOption(val label: String) {
-    Light("Светлая"),
-    Dark("Тёмная"),
-    System("Системная")
+enum class ThemeOption(@StringRes val labelRes: Int) {
+    Light(R.string.theme_light),
+    Dark(R.string.theme_dark),
+    System(R.string.theme_system)
 }
 
 // Варианты языков приложения
-enum class LanguageOption(val displayName: String) {
-    Russian("Русский"),
-    English("English")
+enum class LanguageOption(@StringRes val labelRes: Int) {
+    Russian(R.string.lang_russian),
+    English(R.string.lang_english)
 }
 
-// Модель состояния экрана (имя должно совпадать с тем, что вы используете в ViewModel)
 data class SettingsUiState(
     val currentTheme: ThemeOption = ThemeOption.System,
     val themeOptions: List<ThemeOption> = ThemeOption.values().toList(),
