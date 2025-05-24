@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import com.example.flexydoc.ui.FilePicker
+import com.example.flexydoc.ui.screen.filepicker.FilePicker
 import com.example.flexydoc.ui.theme.FlexyDocTheme
 import androidx.compose.foundation.layout.padding
 

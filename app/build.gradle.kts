@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.flexydoc"
-        minSdk = 34
+        minSdk = 24 // Можно повысить, но обычно 24 — оптимально для поддержки, 34 — только новые устройства
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -31,6 +31,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.3"
+    }
     kotlinOptions {
         jvmTarget = "11"
     }
@@ -40,7 +44,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -49,6 +52,12 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
+    // Для Material Icons (добавить в libs.versions.toml, если нет)
+    implementation("androidx.compose.material:material-icons-extended:1.6.7")
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
+    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
