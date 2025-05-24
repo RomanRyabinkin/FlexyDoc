@@ -6,8 +6,8 @@ package com.example.flexydoc.core
  */
 
 sealed class Screen(val route: String) {
-    object FilePicker : Screen("file_picker")
-    object Settings : Screen("settings")
-    object About : Screen("about")
+    data object FilePicker : Screen("file_picker")
+    data object Settings : Screen("settings")
+    data object About : Screen("about")
 
 }
