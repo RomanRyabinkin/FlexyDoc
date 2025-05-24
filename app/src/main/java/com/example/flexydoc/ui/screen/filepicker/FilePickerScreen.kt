@@ -24,7 +24,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FilePicker(modifier: Modifier = Modifier) {
+fun FilePickerScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     var selectedFileName by remember { mutableStateOf<String?>(null) }
     var selectedFileUri by remember { mutableStateOf<Uri?>(null) }

@@ -3,7 +3,7 @@
     <string name="app_name">FlexyDoc</string>
     <string name="company_name">FlexyDoc.inc</string>
 
-    <!-- Главный экран FilePicker -->
+    <!-- Главный экран FilePickerScreen -->
     <string name="choose_file">Выбрать файл</string>
     <string name="file_not_chosen">Файл не выбран</string>
     <string name="selected_file">Выбран: %1$s</string>
@@ -15,6 +15,7 @@
     <string name="nav_settings">Настройки</string>
     <string name="nav_about">О приложении</string>
     <string name="menu_description">Меню</string>
+
 
     <!-- Экран Настроек -->
     <string name="settings_title">Настройки</string>
