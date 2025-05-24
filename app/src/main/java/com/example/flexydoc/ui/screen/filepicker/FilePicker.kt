@@ -19,7 +19,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 
 /**
  * Главный экран выбора файла с Material3 дизайном.
- *
  * @param modifier Внешний модификатор для размещения на экране.
  */
 

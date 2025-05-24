@@ -13,6 +13,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.flexydoc.R
 
+/**
+ * Экран настроек приложения, отображает опции выбора темы и языка.
+ *
+ * @param viewModel Инстанс [SettingsViewModel], предоставляющий текущее состояние экрана
+ *                  и методы для обновления настроек.
+ */
+
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel()
@@ -64,12 +71,15 @@ fun SettingsScreen(
         )
         Spacer(Modifier.height(8.dp))
 
+        // Флаг, управляющий открытием выпадающего меню
         var expanded by remember { mutableStateOf(false) }
 
         Box {
             OutlinedButton(onClick = { expanded = true }) {
                 Text(text = stringResource(uiState.currentLanguage.labelRes))
             }
+
+            // Само меню с вариантами (LanguageOption)
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
