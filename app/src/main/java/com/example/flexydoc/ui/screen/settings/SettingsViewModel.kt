@@ -49,10 +49,16 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         // Подписка на поток из DataStore
         viewModelScope.launch {
             repo.themeOptionFlow.collect { storedName ->
-                // Попытка спарсить имя в enum; по умолчанию System
                 val theme = runCatching { ThemeOption.valueOf(storedName) }
                     .getOrDefault(ThemeOption.System)
                 _uiState.update { it.copy(currentTheme = theme) }
+            }
+        }
+        viewModelScope.launch {
+            repo.languageOptionFlow.collect { storedLangName ->
+                val language = runCatching { LanguageOption.valueOf(storedLangName) }
+                    .getOrDefault(LanguageOption.Russian)
+                _uiState.update { it.copy(currentLanguage = language) }
             }
         }
     }
@@ -74,6 +80,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
      */
     fun onLanguageSelected(option: LanguageOption) {
         viewModelScope.launch {
+            repo.setLanguageOption(option.name)
             _uiState.update { it.copy(currentLanguage = option) }
         }
     }
