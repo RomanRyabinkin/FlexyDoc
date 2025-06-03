@@ -64,6 +64,17 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     /**
+     * Этот метод запускается внутри composable-скоупа,
+     * suspend и сразу ждёт setLanguageOption.
+     * После записи — обновляется UI-состояние.
+     */
+
+    suspend fun saveLanguageSynchronously(option: LanguageOption) {
+        repo.setLanguageOption(option.name)
+        _uiState.update { it.copy(currentLanguage = option) }
+    }
+
+    /**
      * Обработчик выбора новой темы в UI.
      * Сохраняет её в DataStore и обновляет локальное состояние.
      */

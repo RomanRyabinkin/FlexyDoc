@@ -16,6 +16,8 @@ import androidx.compose.ui.unit.dp
 import com.example.flexydoc.util.getFileName
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.res.stringResource
+import com.example.flexydoc.R
 
 /**
  * Главный экран выбора файла с Material3 дизайном.
@@ -28,6 +30,7 @@ fun FilePickerScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     var selectedFileName by remember { mutableStateOf<String?>(null) }
     var selectedFileUri by remember { mutableStateOf<Uri?>(null) }
+    val conversionDoneText = stringResource(R.string.conversion_done)
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -77,7 +80,7 @@ fun FilePickerScreen(modifier: Modifier = Modifier) {
                 },
                 modifier = Modifier.fillMaxWidth(0.7f)
             ) {
-                Text("Выбрать файл", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.choose_file), style = MaterialTheme.typography.titleMedium)
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -92,7 +95,7 @@ fun FilePickerScreen(modifier: Modifier = Modifier) {
                 Button(
                     onClick = {
                         scope.launch {
-                            snackbarHostState.showSnackbar("Файл сконвертирован!")
+                            snackbarHostState.showSnackbar(conversionDoneText)
                         }
                     },
                     enabled = selectedFileUri != null,
@@ -105,7 +108,7 @@ fun FilePickerScreen(modifier: Modifier = Modifier) {
                 }
             } else {
                 Text(
-                    text = "Файл не выбран",
+                    text = stringResource(R.string.file_not_chosen),
                     style = MaterialTheme.typography.bodyLarge.copy(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

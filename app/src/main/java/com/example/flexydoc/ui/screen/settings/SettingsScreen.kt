@@ -12,6 +12,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.flexydoc.R
+import kotlinx.coroutines.launch
 
 /**
  * Экран настроек приложения, отображает опции выбора темы и языка.
@@ -29,6 +30,8 @@ fun SettingsScreen(
     // Получаем context и «приводим» его к Activity, чтобы потом вызвать recreate()
     val context = LocalContext.current
     val activity = remember { (context as? Activity) }
+
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -93,8 +96,11 @@ fun SettingsScreen(
                     DropdownMenuItem(
                         text = { Text(stringResource(lang.labelRes)) },
                         onClick = {
-                            viewModel.onLanguageSelected(lang)
+//                            viewModel.onLanguageSelected(lang)
                             expanded = false
+                            scope.launch {
+                                viewModel.saveLanguageSynchronously(lang)
+                            }
                             // 2) Перезапуск Activity, чтобы заново сработало attachBaseContext
                             activity?.recreate()
                         }
