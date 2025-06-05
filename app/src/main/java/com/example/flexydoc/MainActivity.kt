@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
         val langCode = when (savedLangName) {
             "English" -> "en"
             "Russian" -> "ru"
-            else -> "ru" // на всякий случай дефолт
+            else -> "ru"
         }
         val wrappedContext = LocaleHelper.wrap(newBase, langCode)
         super.attachBaseContext(wrappedContext)
