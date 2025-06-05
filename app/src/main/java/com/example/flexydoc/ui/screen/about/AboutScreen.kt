@@ -24,11 +24,17 @@ import java.util.Calendar
 @Composable
 fun AboutScreen() {
     val context = LocalContext.current
-    val version = run {
-        val info = context.packageManager.getPackageInfo(context.packageName, 0)
-        info.versionName.orEmpty()
+    val version = try {
+        {
+            val info = context.packageManager.getPackageInfo(context.packageName, 0)
+            info.versionName.orEmpty()
+        }
+    } catch (e: Exception) {
+        ""
     }
+
     val year: Int = Calendar.getInstance().get(Calendar.YEAR)
+    val companyName = stringResource(R.string.company_name)
 
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
@@ -51,7 +57,7 @@ fun AboutScreen() {
         )
         Spacer(Modifier.height(24.dp))
         Text(
-            text = stringResource(R.string.about_copyright, year),
+            text = stringResource(R.string.about_copyright, year, companyName),
             style = MaterialTheme.typography.bodySmall
         )
     }
