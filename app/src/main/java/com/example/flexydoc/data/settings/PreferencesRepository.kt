@@ -27,6 +27,7 @@ class PreferencesRepository(private val context: Context) {
          */
 
         val THEME_KEY = stringPreferencesKey("theme_option")
+        val LANGUAGE_KEY = stringPreferencesKey("language_option")
     }
 
     /**
@@ -37,6 +38,11 @@ class PreferencesRepository(private val context: Context) {
     val themeOptionFlow: Flow<String> = context.dataStore.data
         .map { prefs: Preferences ->
             prefs[THEME_KEY] ?: ThemeOptionName.System.name
+        }
+
+    val languageOptionFlow: Flow<String> = context.dataStore.data
+        .map { prefs: Preferences ->
+            prefs[LANGUAGE_KEY] ?: LanguageOptionName.Russian.name
         }
 
     /**
@@ -51,9 +57,17 @@ class PreferencesRepository(private val context: Context) {
         }
     }
 
+    suspend fun setLanguageOption(optionName: String) {
+        context.dataStore.edit { prefs ->
+            prefs[LANGUAGE_KEY] = optionName
+        }
+    }
+
     /**
      * Вспомогательный enum с текстовыми именами,
      * чтобы не тащить сюда сам ThemeOption из UI-модуля.
      */
     private enum class ThemeOptionName { Light, Dark, System }
+    private enum class LanguageOptionName { Russian, English }
+
 }

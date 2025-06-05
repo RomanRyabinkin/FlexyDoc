@@ -1,17 +1,18 @@
 package com.example.flexydoc.ui.screen.settings
 
+import android.app.Activity
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.flexydoc.R
+import kotlinx.coroutines.launch
 
 /**
  * Экран настроек приложения, отображает опции выбора темы и языка.
@@ -19,12 +20,18 @@ import com.example.flexydoc.R
  * @param viewModel Инстанс [SettingsViewModel], предоставляющий текущее состояние экрана
  *                  и методы для обновления настроек.
  */
-
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel()
 ) {
+    // Берём текущее состояние (тема + язык) из ViewModel
     val uiState by viewModel.uiState.collectAsState()
+
+    // Получаем context и «приводим» его к Activity, чтобы потом вызвать recreate()
+    val context = LocalContext.current
+    val activity = remember { (context as? Activity) }
+
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -52,7 +59,9 @@ fun SettingsScreen(
             ) {
                 RadioButton(
                     selected = uiState.currentTheme == option,
-                    onClick = { viewModel.onThemeSelected(option) }
+                    onClick = {
+                        viewModel.onThemeSelected(option)
+                    }
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
@@ -79,7 +88,6 @@ fun SettingsScreen(
                 Text(text = stringResource(uiState.currentLanguage.labelRes))
             }
 
-            // Само меню с вариантами (LanguageOption)
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
@@ -88,8 +96,13 @@ fun SettingsScreen(
                     DropdownMenuItem(
                         text = { Text(stringResource(lang.labelRes)) },
                         onClick = {
-                            viewModel.onLanguageSelected(lang)
+//                            viewModel.onLanguageSelected(lang)
                             expanded = false
+                            scope.launch {
+                                viewModel.saveLanguageSynchronously(lang)
+                            }
+                            // 2) Перезапуск Activity, чтобы заново сработало attachBaseContext
+                            activity?.recreate()
                         }
                     )
                 }

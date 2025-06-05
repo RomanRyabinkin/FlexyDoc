@@ -49,12 +49,29 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         // Подписка на поток из DataStore
         viewModelScope.launch {
             repo.themeOptionFlow.collect { storedName ->
-                // Попытка спарсить имя в enum; по умолчанию System
                 val theme = runCatching { ThemeOption.valueOf(storedName) }
                     .getOrDefault(ThemeOption.System)
                 _uiState.update { it.copy(currentTheme = theme) }
             }
         }
+        viewModelScope.launch {
+            repo.languageOptionFlow.collect { storedLangName ->
+                val language = runCatching { LanguageOption.valueOf(storedLangName) }
+                    .getOrDefault(LanguageOption.Russian)
+                _uiState.update { it.copy(currentLanguage = language) }
+            }
+        }
+    }
+
+    /**
+     * Этот метод запускается внутри composable-скоупа,
+     * suspend и сразу ждёт setLanguageOption.
+     * После записи — обновляется UI-состояние.
+     */
+
+    suspend fun saveLanguageSynchronously(option: LanguageOption) {
+        repo.setLanguageOption(option.name)
+        _uiState.update { it.copy(currentLanguage = option) }
     }
 
     /**
@@ -74,6 +91,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
      */
     fun onLanguageSelected(option: LanguageOption) {
         viewModelScope.launch {
+            repo.setLanguageOption(option.name)
             _uiState.update { it.copy(currentLanguage = option) }
         }
     }

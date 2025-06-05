@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Основное -->
+    <string name="app_name">FlexyDoc</string>
+    <string name="company_name">FlexyDoc.inc</string>
+
+    <!-- Главный экран FilePickerScreen -->
+    <string name="choose_file">Choose File</string>
+    <string name="file_not_chosen">No File Chosen</string>
+    <string name="selected_file">Selected: %1$s</string>
+    <string name="convert">Convert</string>
+    <string name="conversion_done">File Converted!</string>
+
+    <!-- Навигация (Drawer / TopBar) -->
+    <string name="nav_home">Home</string>
+    <string name="nav_settings">Settings</string>
+    <string name="nav_about">About</string>
+    <string name="menu_description">Menu</string>
+
+    <!-- Экран Настроек -->
+    <string name="settings_title">Settings</string>
+    <string name="theme_label">App Theme</string>
+    <string name="language_label">App Language</string>
+
+    <!-- Опции темы -->
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_system">System Default</string>
+
+    <!-- Опции языка -->
+    <string name="lang_russian">Russian</string>
+    <string name="lang_english">English</string>
+
+    <!-- Экран «О приложении» -->
+    <string name="about_title">About</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_copyright">© %1$d %2$s</string>
+    <string name="year">2025</string>
+</resources>
