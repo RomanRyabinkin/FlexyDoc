@@ -2,6 +2,7 @@ package com.example.flexydoc.ui.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Text
@@ -15,34 +16,39 @@ import com.example.flexydoc.core.Screen
 
 /**
  * Боковая навигационная панель (drawer) приложения.
+ *
+ * @param currentRoute Текущий маршрут (route) из NavController. Используется для подсветки
+ *                     активного пункта навигации.
  * @param onDestinationClick Callback, вызываемый при клике на пункт навигации.
- *        В качестве аргумента передаётся один из маршрутов [Screen].
+ *                            В качестве аргумента передаётся один из объектов [Screen].
+ *
+ * В списке отображаются экраны:
+ *  - [Screen.Home]     — главный экран выбора категории;
+ *  - [Screen.Settings] — экран настроек;
+ *  - [Screen.About]    — экран «О приложении».
  */
 
 @Composable
-fun AppDrawer(onDestinationClick: (Screen) -> Unit) {
+fun AppDrawer(
+    currentRoute: String?,
+    onDestinationClick: (Screen) -> Unit
+) {
+    val destinations = listOf(Screen.Home, Screen.Settings, Screen.About)
+
     ModalDrawerSheet {
         Column(Modifier.padding(16.dp)) {
             Text(
                 text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.titleLarge
             )
-            NavigationDrawerItem(
-                label = { Text(stringResource(R.string.nav_home)) },
-                selected = false,
-                onClick = { onDestinationClick(Screen.FilePicker) }
-            )
-            NavigationDrawerItem(
-                label = { Text(stringResource(R.string.nav_settings)) },
-                selected = false,
-                onClick = { onDestinationClick(Screen.Settings) }
-            )
-            NavigationDrawerItem(
-                label = { Text(stringResource(R.string.nav_about)) },
-                selected = false,
-                onClick = { onDestinationClick(Screen.About) }
-            )
-
+            destinations.forEach { screen ->
+                NavigationDrawerItem(
+                    label     = { Text(stringResource(screen.labelRes)) },
+                    icon      = { screen.icon?.let { Icon(it, contentDescription = null) } },
+                    selected  = currentRoute == screen.route,
+                    onClick   = { onDestinationClick(screen) }
+                )
+            }
         }
     }
 }
