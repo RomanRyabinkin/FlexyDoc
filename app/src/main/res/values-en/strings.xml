@@ -36,4 +36,17 @@
     <string name="about_version">Version %1$s</string>
     <string name="about_copyright">© %1$d %2$s</string>
     <string name="year">2025</string>
+
+    <!-- Разделы -->
+    <string name="picture">Picture</string>
+    <string name="pdf">PDF</string>
+    <string name="word">Word</string>
+
+    <!-- Действия -->
+    <string name="pdf_edit">Edit</string>
+    <string name="pdf_note">Note</string>
+    <string name="pdf_select">Select</string>
+    <string name="pdf_cross_out">Cross out</string>
+    <string name="pdf_print">Print</string>
+
 </resources>

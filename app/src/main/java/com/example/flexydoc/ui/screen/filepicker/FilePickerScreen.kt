@@ -18,15 +18,31 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.stringResource
 import com.example.flexydoc.R
+import com.example.flexydoc.ui.model.FeatureAction
+import com.example.flexydoc.ui.model.FeatureCategory
 
 /**
- * Главный экран выбора файла с Material3 дизайном.
- * @param modifier Внешний модификатор для размещения на экране.
+ * Экран для выбора файла и выполнения выбранного действия над ним.
+ *
+ * Позволяет пользователю:
+ * 1. Открыть диалог выбора документа с MIME-типами, соответствующими [category].
+ * 2. Показать имя выбранного файла и выполнить [action] (конвертация, редактирование, печать и т.д.).
+ * 3. Показать Snackbar с результатом операции.
+ *
+ * @param modifier  [Modifier] для внешнего оформления и позиционирования экрана.
+ * @param category  Выбранная категория документа ([FeatureCategory]), определяющая набор MIME-типов для выбора.
+ * @param action    Выбранное действие ([FeatureAction]), выполняемое над выбранным документом.
+ * @param onBack    Лямбда, вызываемая при нажатии кнопки "Назад" в AppBar для возврата к предыдущему экрану.
  */
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FilePickerScreen(modifier: Modifier = Modifier) {
+fun FilePickerScreen(
+    modifier: Modifier = Modifier,
+    category: FeatureCategory,
+    action: FeatureAction,
+    onBack: () -> Unit
+                     ) {
     val context = LocalContext.current
     var selectedFileName by remember { mutableStateOf<String?>(null) }
     var selectedFileUri by remember { mutableStateOf<Uri?>(null) }

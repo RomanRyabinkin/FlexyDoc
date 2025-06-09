@@ -37,4 +37,17 @@
     <string name="about_copyright">© %1$d %2$s</string>
     <string name="year">2025</string>
 
+    <!-- Разделы -->
+    <string name="picture">Изображение</string>
+    <string name="pdf">PDF</string>
+    <string name="word">Word</string>
+
+
+    <!-- Действия -->
+    <string name="pdf_edit">Редактировать</string>
+    <string name="pdf_note">Заметка</string>
+    <string name="pdf_select">Выделить</string>
+    <string name="pdf_cross_out">Зачеркнуть</string>
+    <string name="pdf_print">Печать</string>
+
 </resources>
