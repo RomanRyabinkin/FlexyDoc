@@ -21,10 +21,10 @@ import java.io.File
 /**
  * Экран просмотра и редактирования PDF-документа.
  *
- * Сначала копируем content:// URI в локальный файл cacheDir,
- * затем открываем PDFView.fromFile.
+ * Если передан content:// URI, копирует его в cacheDir;
+ * если передан file:// URI, использует файл напрямую.
  *
- * @param fileUri       URI содержимого PDF-файла (file:// из cacheDir).
+ * @param fileUri       URI PDF-файла (content:// или file://).
  * @param initialAction Инструмент, активируемый при старте (редактирование, заметка и т.д.).
  * @param onBack        Лямбда для обработки нажатия "Назад".
  * @param modifier      Модификатор для внешнего оформления.
@@ -40,9 +40,13 @@ fun PdfEditorScreen(
     val context = LocalContext.current
     var currentTool by remember { mutableStateOf(initialAction) }
 
-    // Копируем PDF в cacheDir при первом входе
+    // Определяем PDF-файл: копируем content:// в cacheDir, file:// оставляем как есть
     val pdfFile: File = remember(fileUri) {
-        copyPdfToCache(context, fileUri)
+        if (fileUri.scheme == "content") {
+            copyPdfToCache(context, fileUri)
+        } else {
+            File(fileUri.path!!)
+        }
     }
 
     Scaffold(
@@ -58,7 +62,7 @@ fun PdfEditorScreen(
                     }
                 },
                 title = {
-                    Text(text = context.getString(currentTool.titleRes).let { "PDF — $it" })
+                    Text(text = "PDF — ${context.getString(currentTool.titleRes)}")
                 }
             )
         },
@@ -92,8 +96,8 @@ fun PdfEditorScreen(
     ) { innerPadding ->
         Box(
             Modifier
-                .fillMaxSize()
                 .padding(innerPadding)
+                .fillMaxSize()
         ) {
             AndroidView(
                 factory = { ctx ->
