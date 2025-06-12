@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.flexydoc"
-        minSdk = 24 // Можно повысить, но обычно 24 — оптимально для поддержки, 34 — только новые устройства
+        minSdk = 24 // Можно повысить, 24 — оптимально для поддержки, 34 — только новые устройства
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -62,6 +62,7 @@ dependencies {
 
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
+    implementation("com.github.mhiew:android-pdf-viewer:3.2.0-beta.3")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

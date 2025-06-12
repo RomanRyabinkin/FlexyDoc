@@ -5,68 +5,77 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Description
-import androidx.compose.material3.Icon
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import com.example.flexydoc.util.getFileName
-import kotlinx.coroutines.launch
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.example.flexydoc.R
 import com.example.flexydoc.ui.model.FeatureAction
 import com.example.flexydoc.ui.model.FeatureCategory
+import com.example.flexydoc.util.copyPdfToCache
+import java.io.File
 
 /**
- * Экран для выбора файла и выполнения выбранного действия над ним.
+ * Экран выбора файла. Полученный через SAF content:// URI сразу копируется
+ * в внутренний кеш и передается дальше в виде локального URI file://.
  *
- * Позволяет пользователю:
- * 1. Открыть диалог выбора документа с MIME-типами, соответствующими [category].
- * 2. Показать имя выбранного файла и выполнить [action] (конвертация, редактирование, печать и т.д.).
- * 3. Показать Snackbar с результатом операции.
- *
- * @param modifier  [Modifier] для внешнего оформления и позиционирования экрана.
- * @param category  Выбранная категория документа ([FeatureCategory]), определяющая набор MIME-типов для выбора.
- * @param action    Выбранное действие ([FeatureAction]), выполняемое над выбранным документом.
- * @param onBack    Лямбда, вызываемая при нажатии кнопки "Назад" в AppBar для возврата к предыдущему экрану.
+ * @param modifier       Модификатор для внешнего оформления.
+ * @param category       Категория документа, определяет MIME-тип.
+ * @param action         Действие (редактирование, печать и т.д.).
+ * @param onBack         Лямбда для возврата назад.
+ * @param onFileSelected Лямбда, вызываемая после выбора и копирования файла,
+ *                       получает локальный URI (file://).
  */
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FilePickerScreen(
     modifier: Modifier = Modifier,
     category: FeatureCategory,
     action: FeatureAction,
-    onBack: () -> Unit
-                     ) {
+    onBack: () -> Unit,
+    onFileSelected: (Uri) -> Unit
+) {
     val context = LocalContext.current
     var selectedFileName by remember { mutableStateOf<String?>(null) }
-    var selectedFileUri by remember { mutableStateOf<Uri?>(null) }
-    val conversionDoneText = stringResource(R.string.conversion_done)
 
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
-
+    // Контракт GetContent поддерживается на всех устройствах и эмуляторах
     val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument(),
-        onResult = { uri: Uri? ->
-            selectedFileUri = uri
-            selectedFileName = uri?.let { getFileName(context, it) }
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            // Копируем PDF в кэш приложения
+            val cacheFile: File = copyPdfToCache(context, it)
+            selectedFileName = cacheFile.name
+            // Передаём локальный URI
+            onFileSelected(Uri.fromFile(cacheFile))
         }
-    )
+    }
 
     Scaffold(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text("FlexyDoc", style = MaterialTheme.typography.titleLarge) }
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.pdf_screen_back)
+                        )
+                    }
+                },
+                title = {
+                    Text(
+                        text = stringResource(category.titleRes) + " → " + stringResource(action.titleRes),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
             )
-        },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -78,59 +87,36 @@ fun FilePickerScreen(
         ) {
             Icon(
                 imageVector = Icons.Filled.Description,
-                contentDescription = "File Icon",
+                contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(64.dp)
             )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
+            Spacer(Modifier.height(24.dp))
             Button(
                 onClick = {
-                    launcher.launch(
-                        arrayOf(
-                            "application/pdf",
-                            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                        )
-                    )
+                    // Подставляем MIME-тип на основе категории
+                    val mimeType = when (category) {
+                        FeatureCategory.PDF -> "application/pdf"
+                        FeatureCategory.Word -> "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                        FeatureCategory.Image -> "image/*"
+                        else -> "*/*"
+                    }
+                    launcher.launch(mimeType)
                 },
                 modifier = Modifier.fillMaxWidth(0.7f)
             ) {
-                Text(stringResource(R.string.choose_file), style = MaterialTheme.typography.titleMedium)
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            if (selectedFileName != null) {
                 Text(
-                    text = "Выбран: $selectedFileName",
-                    style = MaterialTheme.typography.bodyLarge
+                    text = stringResource(R.string.choose_file),
+                    style = MaterialTheme.typography.titleMedium
                 )
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Button(
-                    onClick = {
-                        scope.launch {
-                            snackbarHostState.showSnackbar(conversionDoneText)
-                        }
-                    },
-                    enabled = selectedFileUri != null,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondary
-                    ),
-                    modifier = Modifier.fillMaxWidth(0.7f)
-                ) {
-                    Text("Конвертировать", style = MaterialTheme.typography.titleMedium)
-                }
-            } else {
+            }
+            selectedFileName?.let { name ->
+                Spacer(Modifier.height(16.dp))
                 Text(
-                    text = stringResource(R.string.file_not_chosen),
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    text = stringResource(R.string.selected_file, name),
+                    style = MaterialTheme.typography.bodyLarge
                 )
             }
         }
     }
 }
-
