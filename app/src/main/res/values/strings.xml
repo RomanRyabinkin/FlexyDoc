@@ -50,4 +50,7 @@
     <string name="pdf_cross_out">Зачеркнуть</string>
     <string name="pdf_print">Печать</string>
 
+    <!-- Экран действий PDF -->
+    <string name="pdf_screen_back">Назад</string>
+
 </resources>

@@ -70,5 +70,10 @@ sealed class Screen(
         labelRes = R.string.nav_about,
         icon     = Icons.Default.Info
     )
+
+    object PdfEditor : Screen("pdfEditor/{fileUri}/{actionName}") {
+        fun createRoute(fileUri: String, actionName: String) =
+            "pdfEditor/$fileUri/$actionName"
+    }
 }
 

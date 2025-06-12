@@ -49,4 +49,7 @@
     <string name="pdf_cross_out">Cross out</string>
     <string name="pdf_print">Print</string>
 
+    <!-- Экран действий PDF -->
+    <string name="pdf_screen_back">Back</string>
+
 </resources>
