@@ -13,32 +13,21 @@ import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.example.flexydoc.R
 import com.example.flexydoc.core.Screen
+import com.example.flexydoc.converter.RealPdfConverter
 import com.example.flexydoc.ui.components.AppDrawer
 import com.example.flexydoc.ui.components.TopBar
 import com.example.flexydoc.ui.model.FeatureAction
 import com.example.flexydoc.ui.model.FeatureCategory
-import com.example.flexydoc.ui.screen.actions.ActionsScreen
-import com.example.flexydoc.ui.screen.filepicker.FilePickerScreen
-import com.example.flexydoc.ui.screen.home.HomeScreen
-import com.example.flexydoc.ui.screen.settings.SettingsScreen
 import com.example.flexydoc.ui.screen.about.AboutScreen
+import com.example.flexydoc.ui.screen.actions.ActionsScreen
+import com.example.flexydoc.ui.screen.convert.PdfConvertScreen
+import com.example.flexydoc.ui.screen.filepicker.FilePickerScreen
+import com.example.flexydoc.ui.screen.formatselection.FormatSelectionScreen
+import com.example.flexydoc.ui.screen.formatselection.PdfFormat
+import com.example.flexydoc.ui.screen.home.HomeScreen
 import com.example.flexydoc.ui.screen.pdf.PdfEditorScreen
+import com.example.flexydoc.ui.screen.settings.SettingsScreen
 import kotlinx.coroutines.launch
-
-/**
- * Корневой Composable приложения FlexyDoc.
- *
- * Оборачивает навигацию в общий [ModalNavigationDrawer] с боковым меню
- * и [Scaffold] с [TopBar], а внутри задаёт [NavHost] со всеми маршрутами:
- *  - [Screen.Home]     — главный экран выбора категории;
- *  - [Screen.Actions]  — выбор действия внутри категории;
- *  - [Screen.Picker]   — выбор файла и запуск конкретного действия;
- *  - [Screen.Settings] — экран настроек;
- *  - [Screen.About]    — экран "О приложении".
- *
- * Самостоятельно управляет состоянием drawer’а и подсветкой активного пункта
- * через текущий `route` из `NavController.currentBackStackEntryAsState()`.
- */
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,14 +35,14 @@ fun AppRoot() {
     val navController = rememberNavController()
     val drawerState   = rememberDrawerState(DrawerValue.Closed)
     val scope         = rememberCoroutineScope()
-    val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute  = backStackEntry?.destination?.route
+    val backEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = backEntry?.destination?.route
 
     ModalNavigationDrawer(
-        drawerState  = drawerState,
+        drawerState = drawerState,
         drawerContent = {
             AppDrawer(
-                currentRoute       = currentRoute,
+                currentRoute = currentRoute,
                 onDestinationClick = { screen ->
                     scope.launch { drawerState.close() }
                     navController.navigate(screen.route) {
@@ -71,20 +60,20 @@ fun AppRoot() {
                     onNavClick = { scope.launch { drawerState.open() } }
                 )
             }
-        ) { innerPadding ->
+        ) { padding ->
             NavHost(
                 navController    = navController,
                 startDestination = Screen.Home.route,
-                modifier         = Modifier.padding(innerPadding)
+                modifier         = Modifier.padding(padding)
             ) {
                 // 1) HomeScreen — выбор категории
                 composable(Screen.Home.route) {
                     HomeScreen(
                         onCategorySelected = { category ->
-                        navController.navigate(
-                            Screen.Actions.createRoute(category::class.simpleName!!)
-                        )
-                    }
+                            navController.navigate(
+                                Screen.Actions.createRoute(category::class.simpleName!!)
+                            )
+                        }
                     )
                 }
 
@@ -94,8 +83,8 @@ fun AppRoot() {
                     arguments = listOf(
                         navArgument("categoryName") { type = NavType.StringType }
                     )
-                ) { backStack ->
-                    val catName = backStack.arguments!!.getString("categoryName")!!
+                ) { entry ->
+                    val catName = entry.arguments!!.getString("categoryName")!!
                     val category = when (catName) {
                         FeatureCategory.PDF::class.simpleName   -> FeatureCategory.PDF
                         FeatureCategory.Word::class.simpleName  -> FeatureCategory.Word
@@ -106,26 +95,35 @@ fun AppRoot() {
                         category         = category,
                         onBack           = { navController.popBackStack() },
                         onActionSelected = { action ->
-                            navController.navigate(
-                                Screen.Picker.createRoute(
-                                    catName,
-                                    action::class.simpleName!!
+                            if (action == FeatureAction.Convert) {
+                                navController.navigate(
+                                    Screen.FormatSelection.createRoute(
+                                        catName,
+                                        action::class.simpleName!!
+                                    )
                                 )
-                            )
+                            } else {
+                                navController.navigate(
+                                    Screen.Picker.createRoute(
+                                        catName,
+                                        action::class.simpleName!!
+                                    )
+                                )
+                            }
                         }
                     )
                 }
 
-                // 3) FilePickerScreen — выбор файла и запуск действия
+                // 3) FilePickerScreen — выбор файла для Edit/Annotate/Highlight/StrikeThrough/Print
                 composable(
                     route = Screen.Picker.route,
                     arguments = listOf(
                         navArgument("categoryName") { type = NavType.StringType },
                         navArgument("actionName")   { type = NavType.StringType }
                     )
-                ) { backStack ->
-                    val catName = backStack.arguments!!.getString("categoryName")!!
-                    val actName = backStack.arguments!!.getString("actionName")!!
+                ) { entry ->
+                    val catName = entry.arguments!!.getString("categoryName")!!
+                    val actName = entry.arguments!!.getString("actionName")!!
                     val category = when (catName) {
                         FeatureCategory.PDF::class.simpleName   -> FeatureCategory.PDF
                         FeatureCategory.Word::class.simpleName  -> FeatureCategory.Word
@@ -141,29 +139,92 @@ fun AppRoot() {
                         else -> FeatureAction.Edit
                     }
                     FilePickerScreen(
-                        category = category,
-                        action   = action,
-                        onBack   = { navController.popBackStack() },
-                        onFileSelected = { uri ->
-                            val uriString = Uri.encode(uri.toString())
+                        category       = category,
+                        action         = action,
+                        onBack         = { navController.popBackStack() }
+                    ) { uri ->
+                        val encoded = Uri.encode(uri.toString())
+                        navController.navigate(
+                            Screen.PdfEditor.createRoute(
+                                encoded,
+                                action::class.simpleName!!
+                            )
+                        )
+                    }
+                }
+
+                // 4) FormatSelectionScreen — выбор формата
+                composable(
+                    route = Screen.FormatSelection.route,
+                    arguments = listOf(
+                        navArgument("categoryName") { type = NavType.StringType },
+                        navArgument("actionName")   { type = NavType.StringType }
+                    )
+                ) {
+                    FormatSelectionScreen(
+                        onBack = { navController.popBackStack() },
+                        onFormatSelected = { fmt ->
                             navController.navigate(
-                                Screen.PdfEditor.createRoute(uriString, action::class.simpleName!!)
+                                Screen.PickerConvert.createRoute(fmt.ext)
                             )
                         }
                     )
                 }
 
+                // 5) FilePickerScreen для конвертации
+                composable(
+                    route = Screen.PickerConvert.route,
+                    arguments = listOf(
+                        navArgument("format") { type = NavType.StringType }
+                    )
+                ) { entry ->
+                    val fmtKey = entry.arguments!!.getString("format")!!
+                    FilePickerScreen(
+                        category       = FeatureCategory.PDF,
+                        action         = FeatureAction.Convert,
+                        onBack         = { navController.popBackStack() }
+                    ) { uri ->
+                        val encoded = Uri.encode(uri.toString())
+                        navController.navigate(
+                            Screen.PdfConvert.createRoute(fmtKey, encoded)
+                        )
+                    }
+                }
+
+                // 6) PdfConvertScreen — конвертация с прогрессом
+                composable(
+                    route = Screen.PdfConvert.route,
+                    arguments = listOf(
+                        navArgument("format") { type = NavType.StringType },
+                        navArgument("uri")    { type = NavType.StringType }
+                    )
+                ) { entry ->
+                    val fmtKey = entry.arguments!!.getString("format")!!
+                    val uriStr = entry.arguments!!.getString("uri")!!
+                    val parsed = Uri.parse(Uri.decode(uriStr))
+                    val fmt    = PdfFormat.values().first { it.ext == fmtKey }
+
+                    // Передаём параметры позиционно согласно сигнатуре:
+                    // PdfConvertScreen(format: PdfFormat, onBack: ()->Unit, converter: PdfConverter = ...)
+                    PdfConvertScreen(
+                        format = fmt,
+                        converter = RealPdfConverter(),
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+
+                // 7) PdfEditorScreen — просмотр/редактирование
                 composable(
                     route = Screen.PdfEditor.route,
                     arguments = listOf(
                         navArgument("fileUri")    { type = NavType.StringType },
                         navArgument("actionName") { type = NavType.StringType }
                     )
-                ) { back ->
-                    val uriString  = back.arguments!!.getString("fileUri")!!
-                    val actionName = back.arguments!!.getString("actionName")!!
-                    val fileUri    = Uri.parse(Uri.decode(uriString))
-                    val action     = when(actionName) {
+                ) { entry ->
+                    val fileUriStr = entry.arguments!!.getString("fileUri")!!
+                    val actName2   = entry.arguments!!.getString("actionName")!!
+                    val parsedUri  = Uri.parse(Uri.decode(fileUriStr))
+                    val action2    = when (actName2) {
                         FeatureAction.Edit::class.simpleName          -> FeatureAction.Edit
                         FeatureAction.Annotate::class.simpleName      -> FeatureAction.Annotate
                         FeatureAction.Highlight::class.simpleName     -> FeatureAction.Highlight
@@ -171,18 +232,19 @@ fun AppRoot() {
                         FeatureAction.Print::class.simpleName         -> FeatureAction.Print
                         else -> FeatureAction.Edit
                     }
+
+                    // По вашей сигнатуре: PdfEditorScreen(fileUri: Uri, initialAction: FeatureAction, onBack: ()->Unit)
                     PdfEditorScreen(
-                        fileUri       = fileUri,
-                        initialAction  = action,
-                        onBack        = { navController.popBackStack() }
+                        fileUri = parsedUri,
+                        initialAction = action2,
+                        onBack = { navController.popBackStack() }
                     )
                 }
 
-                // 4) Settings и About
+                // 8) Settings и About
                 composable(Screen.Settings.route) { SettingsScreen() }
                 composable(Screen.About.route)    { AboutScreen()   }
             }
         }
     }
 }
-

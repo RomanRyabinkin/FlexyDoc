@@ -37,7 +37,8 @@ fun ActionsScreen(
         FeatureAction.Annotate,
         FeatureAction.Highlight,
         FeatureAction.StrikeThrough,
-        FeatureAction.Print
+        FeatureAction.Print,
+        FeatureAction.Convert
     )
 
     Scaffold(
@@ -54,12 +55,10 @@ fun ActionsScreen(
         modifier = modifier
     ) { innerPadding ->
         LazyColumn(
-            // только innerPadding
             contentPadding = innerPadding,
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier
                 .fillMaxSize()
-                // и здесь добавляем свои 16.dp
                 .padding(16.dp)
         ) {
             items(actions) { action ->
