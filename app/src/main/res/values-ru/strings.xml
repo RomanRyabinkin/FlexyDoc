@@ -65,4 +65,7 @@
     <!-- Экран начала конвертации -->
     <string name="start_convertation">Начать конвертацию</string>
 
+    <!-- Android toast'ы -->
+    <string name="toast_saved_to_downloads">%1$s успешно сохранён в «Загрузки»</string>
+
 </resources>
