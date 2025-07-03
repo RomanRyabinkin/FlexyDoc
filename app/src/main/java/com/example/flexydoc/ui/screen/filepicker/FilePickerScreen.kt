@@ -41,7 +41,6 @@ fun FilePickerScreen(
     onFileSelected: (Uri) -> Unit
 ) {
     val context = LocalContext.current
-    var selectedFileName by remember { mutableStateOf<String?>(null) }
 
     // Контракт GetContent поддерживается на всех устройствах и эмуляторах
     val launcher = rememberLauncherForActivityResult(
@@ -50,7 +49,6 @@ fun FilePickerScreen(
         uri?.let {
             // Копируем PDF в кэш приложения
             val cacheFile: File = copyPdfToCache(context, it)
-            selectedFileName = cacheFile.name
             // Передаём локальный URI
             onFileSelected(Uri.fromFile(cacheFile))
         }
@@ -108,13 +106,6 @@ fun FilePickerScreen(
                 Text(
                     text = stringResource(R.string.choose_file),
                     style = MaterialTheme.typography.titleMedium
-                )
-            }
-            selectedFileName?.let { name ->
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    text = stringResource(R.string.selected_file, name),
-                    style = MaterialTheme.typography.bodyLarge
                 )
             }
         }

@@ -81,15 +81,9 @@ sealed class Screen(
             "format_selection/$categoryName/$actionName"
     }
 
-    object PickerConvert : Screen("picker_convert/{format}") {
-        fun createRoute(format: String) =
-            "picker_convert/$format"
-    }
-
 
     object PdfConvert : Screen("pdf_convert/{format}/{uri}") {
-        fun createRoute(format: String, encodedUri: String) =
-            "pdf_convert/$format/$encodedUri"
+        fun createRoute(format: String) = "pdf_convert/$format"
     }
 }
 

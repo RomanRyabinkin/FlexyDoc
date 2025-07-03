@@ -56,7 +56,7 @@ fun AppRoot() {
         Scaffold(
             topBar = {
                 TopBar(
-                    title    = stringResource(R.string.app_name),
+                    title     = stringResource(R.string.app_name),
                     onNavClick = { scope.launch { drawerState.open() } }
                 )
             }
@@ -92,8 +92,8 @@ fun AppRoot() {
                         else -> FeatureCategory.PDF
                     }
                     ActionsScreen(
-                        category         = category,
-                        onBack           = { navController.popBackStack() },
+                        category = category,
+                        onBack   = { navController.popBackStack() },
                         onActionSelected = { action ->
                             if (action == FeatureAction.Convert) {
                                 navController.navigate(
@@ -114,7 +114,7 @@ fun AppRoot() {
                     )
                 }
 
-                // 3) FilePickerScreen — выбор файла для Edit/Annotate/Highlight/StrikeThrough/Print
+                // 3) FilePickerScreen — выбор для Edit/Annotate/…/Print
                 composable(
                     route = Screen.Picker.route,
                     arguments = listOf(
@@ -139,9 +139,9 @@ fun AppRoot() {
                         else -> FeatureAction.Edit
                     }
                     FilePickerScreen(
-                        category       = category,
-                        action         = action,
-                        onBack         = { navController.popBackStack() }
+                        category = category,
+                        action   = action,
+                        onBack   = { navController.popBackStack() }
                     ) { uri ->
                         val encoded = Uri.encode(uri.toString())
                         navController.navigate(
@@ -153,7 +153,7 @@ fun AppRoot() {
                     }
                 }
 
-                // 4) FormatSelectionScreen — выбор формата
+                // 4) FormatSelectionScreen — выбор формата конвертации
                 composable(
                     route = Screen.FormatSelection.route,
                     arguments = listOf(
@@ -164,56 +164,31 @@ fun AppRoot() {
                     FormatSelectionScreen(
                         onBack = { navController.popBackStack() },
                         onFormatSelected = { fmt ->
+                            // сразу переходим в экран конвертации
                             navController.navigate(
-                                Screen.PickerConvert.createRoute(fmt.ext)
+                                Screen.PdfConvert.createRoute(fmt.ext)
                             )
                         }
                     )
                 }
 
-                // 5) FilePickerScreen для конвертации
+                // 5) PdfConvertScreen — выбор файла + конвертация
                 composable(
-                    route = Screen.PickerConvert.route,
+                    route = "pdf_convert/{format}",
                     arguments = listOf(
                         navArgument("format") { type = NavType.StringType }
                     )
                 ) { entry ->
                     val fmtKey = entry.arguments!!.getString("format")!!
-                    FilePickerScreen(
-                        category       = FeatureCategory.PDF,
-                        action         = FeatureAction.Convert,
-                        onBack         = { navController.popBackStack() }
-                    ) { uri ->
-                        val encoded = Uri.encode(uri.toString())
-                        navController.navigate(
-                            Screen.PdfConvert.createRoute(fmtKey, encoded)
-                        )
-                    }
-                }
-
-                // 6) PdfConvertScreen — конвертация с прогрессом
-                composable(
-                    route = Screen.PdfConvert.route,
-                    arguments = listOf(
-                        navArgument("format") { type = NavType.StringType },
-                        navArgument("uri")    { type = NavType.StringType }
-                    )
-                ) { entry ->
-                    val fmtKey = entry.arguments!!.getString("format")!!
-                    val uriStr = entry.arguments!!.getString("uri")!!
-                    val parsed = Uri.parse(Uri.decode(uriStr))
                     val fmt    = PdfFormat.values().first { it.ext == fmtKey }
-
-                    // Передаём параметры позиционно согласно сигнатуре:
-                    // PdfConvertScreen(format: PdfFormat, onBack: ()->Unit, converter: PdfConverter = ...)
                     PdfConvertScreen(
-                        format = fmt,
-                        converter = RealPdfConverter(),
-                        onBack = { navController.popBackStack() }
+                        format    = fmt,
+                        onBack    = { navController.popBackStack() },
+                        converter = RealPdfConverter()
                     )
                 }
 
-                // 7) PdfEditorScreen — просмотр/редактирование
+                // 6) PdfEditorScreen — просмотр/редактирование PDF
                 composable(
                     route = Screen.PdfEditor.route,
                     arguments = listOf(
@@ -232,18 +207,16 @@ fun AppRoot() {
                         FeatureAction.Print::class.simpleName         -> FeatureAction.Print
                         else -> FeatureAction.Edit
                     }
-
-                    // По вашей сигнатуре: PdfEditorScreen(fileUri: Uri, initialAction: FeatureAction, onBack: ()->Unit)
                     PdfEditorScreen(
-                        fileUri = parsedUri,
+                        fileUri       = parsedUri,
                         initialAction = action2,
-                        onBack = { navController.popBackStack() }
+                        onBack        = { navController.popBackStack() }
                     )
                 }
 
-                // 8) Settings и About
+                // 7) Settings и About
                 composable(Screen.Settings.route) { SettingsScreen() }
-                composable(Screen.About.route)    { AboutScreen()   }
+                composable(Screen.About.route)    { AboutScreen() }
             }
         }
     }
