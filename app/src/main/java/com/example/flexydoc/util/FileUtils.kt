@@ -5,24 +5,28 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import java.io.File
 
-fun getFileName(context: Context, uri: Uri): String? {
-    val cursor = context.contentResolver.query(uri, null, null, null, null)
-    var name: String? = null
-    cursor?.use {
-        val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-        if (it.moveToFirst()) {
-            name = it.getString(nameIndex)
+fun Context.getFileName(uri: Uri): String? {
+    contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
+        ?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val idx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if (idx != -1) return cursor.getString(idx)
+            }
         }
-    }
-    return name
+    return null
 }
 
 /**
  * Копирует указанный content:// URI во внутренний кэш и возвращает получившийся файл.
  * Вызывать сразу в onResult() контракта, пока права на чтение ещё свежие.
  */
-fun copyPdfToCache(context: Context, uri: Uri): File {
-    val outFile = File(context.cacheDir, "opened.pdf")
+fun copyPdfToCache(
+    context: Context,
+    uri: Uri,
+    fallbackName: String = "document.pdf"
+): File {
+    val originalName = context.getFileName(uri) ?: fallbackName
+    val outFile = File(context.cacheDir, originalName)
     context.contentResolver.openInputStream(uri)!!.use { input ->
         outFile.outputStream().use { output ->
             input.copyTo(output)

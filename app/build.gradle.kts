@@ -10,12 +10,21 @@ android {
 
     defaultConfig {
         applicationId = "com.example.flexydoc"
-        minSdk = 24 // Можно повысить, 24 — оптимально для поддержки, 34 — только новые устройства
+        minSdk = 26 // Можно повысить, 24 — оптимально для поддержки, 34 — только новые устройства
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
+        multiDexEnabled = true
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    packagingOptions {
+        resources {
+            // Включаем нужные текстовые ресурсы для PDFBox
+            pickFirst("**/glyphlist.txt")
+            pickFirst("**/additional.txt")
+        }
     }
 
     buildTypes {
@@ -63,6 +72,10 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
     implementation("com.github.mhiew:android-pdf-viewer:3.2.0-beta.3")
+
+    implementation("androidx.multidex:multidex:2.0.1")
+    implementation("com.tom-roush:pdfbox-android:2.0.27.0")
+    implementation(files("libs/poishadow-all.jar"))
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

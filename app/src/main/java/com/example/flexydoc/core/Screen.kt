@@ -75,5 +75,15 @@ sealed class Screen(
         fun createRoute(fileUri: String, actionName: String) =
             "pdfEditor/$fileUri/$actionName"
     }
+
+    object FormatSelection : Screen("format_selection/{categoryName}/{actionName}") {
+        fun createRoute(categoryName: String, actionName: String) =
+            "format_selection/$categoryName/$actionName"
+    }
+
+
+    object PdfConvert : Screen("pdf_convert/{format}/{uri}") {
+        fun createRoute(format: String) = "pdf_convert/$format"
+    }
 }
 

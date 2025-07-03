@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.flexydoc.R
+import com.example.flexydoc.ui.components.FilePickerButton
 import com.example.flexydoc.ui.model.FeatureAction
 import com.example.flexydoc.ui.model.FeatureCategory
 import com.example.flexydoc.util.copyPdfToCache
@@ -41,7 +42,6 @@ fun FilePickerScreen(
     onFileSelected: (Uri) -> Unit
 ) {
     val context = LocalContext.current
-    var selectedFileName by remember { mutableStateOf<String?>(null) }
 
     // Контракт GetContent поддерживается на всех устройствах и эмуляторах
     val launcher = rememberLauncherForActivityResult(
@@ -50,7 +50,6 @@ fun FilePickerScreen(
         uri?.let {
             // Копируем PDF в кэш приложения
             val cacheFile: File = copyPdfToCache(context, it)
-            selectedFileName = cacheFile.name
             // Передаём локальный URI
             onFileSelected(Uri.fromFile(cacheFile))
         }
@@ -85,38 +84,19 @@ fun FilePickerScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(
-                imageVector = Icons.Filled.Description,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(64.dp)
-            )
             Spacer(Modifier.height(24.dp))
-            Button(
+            FilePickerButton(
+                modifier = Modifier.fillMaxWidth(0.7f),
                 onClick = {
-                    // Подставляем MIME-тип на основе категории
                     val mimeType = when (category) {
-                        FeatureCategory.PDF -> "application/pdf"
-                        FeatureCategory.Word -> "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                        FeatureCategory.PDF   -> "application/pdf"
+                        FeatureCategory.Word  -> "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                         FeatureCategory.Image -> "image/*"
-                        else -> "*/*"
+                        else                  -> "*/*"
                     }
                     launcher.launch(mimeType)
-                },
-                modifier = Modifier.fillMaxWidth(0.7f)
-            ) {
-                Text(
-                    text = stringResource(R.string.choose_file),
-                    style = MaterialTheme.typography.titleMedium
-                )
-            }
-            selectedFileName?.let { name ->
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    text = stringResource(R.string.selected_file, name),
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
+                }
+            )
         }
     }
 }

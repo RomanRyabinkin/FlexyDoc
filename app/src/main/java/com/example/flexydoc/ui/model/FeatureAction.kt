@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.Highlight
 import androidx.compose.material.icons.filled.Note
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.StrikethroughS
+import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.flexydoc.R
 
@@ -27,4 +28,5 @@ sealed class FeatureAction(
     object Highlight    : FeatureAction(R.string.pdf_select,     Icons.Default.Highlight)
     object StrikeThrough: FeatureAction(R.string.pdf_cross_out, Icons.Default.StrikethroughS)
     object Print        : FeatureAction(R.string.pdf_print,      Icons.Default.Print)
+    object Convert        : FeatureAction(R.string.pdf_convert,      Icons.Default.SwapHoriz)
 }

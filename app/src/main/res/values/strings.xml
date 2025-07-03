@@ -49,8 +49,28 @@
     <string name="pdf_select">Выделить</string>
     <string name="pdf_cross_out">Зачеркнуть</string>
     <string name="pdf_print">Печать</string>
+    <string name="pdf_convert">Конвертировать</string>
+
 
     <!-- Экран действий PDF -->
     <string name="pdf_screen_back">Назад</string>
+
+    <!-- Формат конвертации -->
+    <string name="word_convertation">Word (.docx)</string>
+    <string name="excel_convertation">Excel (.xlsx)</string>
+    <string name="jpg_convertation">Image(.jpg)</string>
+    <string name="png_convertation">Image(.png)</string>
+
+    <!-- Экран выбора формата для конвертацции -->
+    <string name="choose_format">Выберите формат</string>
+
+    <!-- Экран начала конвертации -->
+    <string name="conversion_to_format_title">Конвертация в %1$s</string>
+    <string name="select_pdf">Выберите PDF</string>
+    <string name="pdf_selected">PDF выбран</string>
+    <string name="start_convertation">Начать конвертацию</string>
+
+    <!-- Android toast'ы -->
+    <string name="toast_saved_to_downloads">%1$s успешно сохранён в «Загрузки»</string>
 
 </resources>

@@ -12,6 +12,7 @@ import com.example.flexydoc.ui.AppRoot
 import com.example.flexydoc.ui.theme.FlexyDocTheme
 import com.example.flexydoc.ui.screen.settings.SettingsViewModel
 import com.example.flexydoc.util.LocaleHelper
+import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.first
 
@@ -33,6 +34,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        PDFBoxResourceLoader.init(this)
 
         setContent {
             val settingsViewModel: SettingsViewModel = viewModel()
