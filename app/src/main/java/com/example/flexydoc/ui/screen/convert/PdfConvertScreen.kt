@@ -78,7 +78,6 @@ fun PdfConvertScreen(
                         scope.launch {
                             isConverting = true
                             progress = 0f
-                            // выполняем конвертацию
                             converter.convert(
                                 context     = context,
                                 sourceUri   = src,
@@ -86,11 +85,10 @@ fun PdfConvertScreen(
                             ) { pct ->
                                 progress = pct
                             }
-                            // по окончании сбрасываем состояние
                             isConverting = false
                             pdfUri       = null
                             progress     = 0f
-                            // здесь можно показать Snackbar/Toast, если нужно
+                            // здесь можно показать Snackbar/Toast в будущем
                         }
                     }
                 },
