@@ -46,10 +46,13 @@ fun PdfConvertScreen(
     val context = LocalContext.current
     var pdfUri by remember { mutableStateOf<Uri?>(null) }
     var progress by remember { mutableStateOf(0f) }  // 0f–1f
-    var status by remember { mutableStateOf<String?>(null) }
+    var isConverting by remember { mutableStateOf(false) }
+    val status by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        pdfUri = uri
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        if (uri != null && !isConverting) {
+            pdfUri = uri
+        }
     }
 
     Scaffold(
@@ -64,20 +67,28 @@ fun PdfConvertScreen(
                 onClick = {
                     pdfUri?.let { src ->
                         scope.launch {
-                            // преобразование, обновляем progress
-                            val outFile = converter.convert(
-                                context = context,
-                                sourceUri = src,
-                                targetFormat = format,
-                                onProgress = { pct -> progress = pct }
-                            )
-                            status = "Файл ${outFile.name} успешно конвертирован в ${format.ext}"
-                            // можно выдать Toast или Snackbar
+                            isConverting = true
+                            progress = 0f
+                            // выполняем конвертацию
+                            converter.convert(
+                                context     = context,
+                                sourceUri   = src,
+                                targetFormat= format
+                            ) { pct ->
+                                progress = pct
+                            }
+                            // по окончании сбрасываем состояние
+                            isConverting = false
+                            pdfUri       = null
+                            progress     = 0f
+                            // здесь можно показать Snackbar/Toast, если нужно
                         }
                     }
                 },
-                enabled = pdfUri != null,
-                modifier = Modifier.fillMaxWidth().padding(16.dp)
+                enabled = pdfUri != null && !isConverting,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
             ) {
                 Text("Начать конвертацию")
             }
@@ -90,17 +101,23 @@ fun PdfConvertScreen(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Button(onClick = { launcher.launch("application/pdf") }) {
+            Button(onClick = { launcher.launch("application/pdf") },
+                enabled = !isConverting
+            ) {
                 Text(if (pdfUri==null) "Выберите PDF" else "PDF выбран")
             }
             Spacer(Modifier.height(24.dp))
-            if (progress in 0f..1f) {
-                LinearProgressIndicator(progress, Modifier.fillMaxWidth())
-                Text("${(progress*100).toInt()}%", style = MaterialTheme.typography.bodySmall)
-            }
-            status?.let {
-                Spacer(Modifier.height(24.dp))
-                Text(it, color = MaterialTheme.colorScheme.primary)
+
+            if (isConverting) {
+                LinearProgressIndicator(
+                    progress = progress,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "${(progress * 100).toInt()}%",
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         }
     }
