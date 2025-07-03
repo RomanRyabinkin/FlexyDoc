@@ -29,8 +29,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.protobuf.Internal.ListAdapter.Converter
+import com.example.flexydoc.R
 import com.example.flexydoc.converter.PdfConverter
 import com.example.flexydoc.converter.RealPdfConverter
 import com.example.flexydoc.ui.screen.formatselection.PdfFormat
@@ -59,7 +61,14 @@ fun PdfConvertScreen(
         topBar = {
             TopAppBar(
                 navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, null) } },
-                title = { Text("Конвертация в ${format.ext}") }
+                title = {
+                    Text(
+                        stringResource(
+                            R.string.conversion_to_format_title,
+                            format.ext
+                        )
+                    )
+                }
             )
         },
         bottomBar = {
@@ -90,7 +99,7 @@ fun PdfConvertScreen(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                Text("Начать конвертацию")
+                Text(stringResource(R.string.start_convertation))
             }
         }
     ) { padding ->
@@ -104,7 +113,12 @@ fun PdfConvertScreen(
             Button(onClick = { launcher.launch("application/pdf") },
                 enabled = !isConverting
             ) {
-                Text(if (pdfUri==null) "Выберите PDF" else "PDF выбран")
+                Text(
+                    if (pdfUri==null)
+                        stringResource(R.string.select_pdf)
+                    else
+                        stringResource(R.string.pdf_selected)
+                )
             }
             Spacer(Modifier.height(24.dp))
 

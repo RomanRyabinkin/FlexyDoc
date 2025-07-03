@@ -62,8 +62,11 @@
     <!-- Экран выбора формата для конвертацции -->
     <string name="choose_format">Choose format</string>
 
-    <!-- Экран начала конвертации -->
-    <string name="start_convertation">Начать конвертацию</string>
+    <!-- Экран конвертации -->
+    <string name="conversion_to_format_title">Conversion to %1$s</string>
+    <string name="select_pdf">Select PDF</string>
+    <string name="pdf_selected">PDF selected</string>
+    <string name="start_convertation">Start conversion</string>
 
     <!-- Android toast'ы -->
     <string name="toast_saved_to_downloads">%1$s successfully saved to Downloads</string>
