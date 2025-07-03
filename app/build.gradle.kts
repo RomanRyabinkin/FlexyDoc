@@ -75,7 +75,8 @@ dependencies {
 
     implementation("androidx.multidex:multidex:2.0.1")
     implementation("com.tom-roush:pdfbox-android:2.0.27.0")
-    implementation(files("libs/poishadow-all.jar"))
+    implementation("org.apache.poi:poi-ooxml:5.2.5")
+//    implementation(files("libs/poishadow-all.jar"))
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

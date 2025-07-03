@@ -72,5 +72,6 @@
 
     <!-- Android toast'ы -->
     <string name="toast_saved_to_downloads">%1$s успешно сохранён в «Загрузки»</string>
+    <string name="toast_save_fail">Ошибка при загрузке %1$s</string>
 
 </resources>

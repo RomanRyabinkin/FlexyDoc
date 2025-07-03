@@ -70,5 +70,6 @@
 
     <!-- Android toast'ы -->
     <string name="toast_saved_to_downloads">%1$s successfully saved to Downloads</string>
+    <string name="toast_save_fail">Error saving %1$s</string>
 
 </resources>
