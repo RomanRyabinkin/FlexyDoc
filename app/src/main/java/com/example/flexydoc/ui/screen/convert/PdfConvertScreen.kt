@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -35,6 +36,7 @@ import androidx.datastore.preferences.protobuf.Internal.ListAdapter.Converter
 import com.example.flexydoc.R
 import com.example.flexydoc.converter.PdfConverter
 import com.example.flexydoc.converter.RealPdfConverter
+import com.example.flexydoc.ui.components.FilePickerButton
 import com.example.flexydoc.ui.screen.formatselection.PdfFormat
 import kotlinx.coroutines.launch
 
@@ -108,15 +110,13 @@ fun PdfConvertScreen(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Button(onClick = { launcher.launch("application/pdf") },
-                enabled = !isConverting
+            FilePickerButton(
+                icon    = Icons.Default.Description,
+                textRes = if (pdfUri == null) R.string.select_pdf else R.string.pdf_selected,
+                enabled = !isConverting,
+                modifier = Modifier.fillMaxWidth(0.7f)
             ) {
-                Text(
-                    if (pdfUri==null)
-                        stringResource(R.string.select_pdf)
-                    else
-                        stringResource(R.string.pdf_selected)
-                )
+                launcher.launch("application/pdf")
             }
             Spacer(Modifier.height(24.dp))
 

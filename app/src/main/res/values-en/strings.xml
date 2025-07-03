@@ -56,8 +56,8 @@
     <!-- Формат конвертации -->
     <string name="word_convertation">Word (.docx)</string>
     <string name="excel_convertation">Excel (.xlsx)</string>
-    <string name="jpg_convertation">Image JPG</string>
-    <string name="png_convertation">Image PNG</string>
+    <string name="jpg_convertation">Image(.jpg)</string>
+    <string name="png_convertation">Image(.png)</string>
 
     <!-- Экран выбора формата для конвертацции -->
     <string name="choose_format">Choose format</string>
