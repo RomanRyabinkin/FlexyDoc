@@ -1,223 +1,167 @@
-# Petstore REST Automation (Python)
+# FlexyDoc: Android PDF Converter & Editor
 
 ## 🇬🇧 English
 
-A Python-based, extensible framework for automating tests against the Swagger Petstore REST API using:
+> **Default branch**: `master` (all actual code and documentation is in the `master` branch).
 
-- **pytest** + **allure-pytest**  
-- **requests**  
-- **SQLAlchemy**  
-- **jsonschema**
+**FlexyDoc** is an Android mobile client for viewing, editing, and converting PDF documents. The app supports:
 
-### Table of Contents
+* **PDF Conversion** into multiple formats:
 
-- [Project Description](#project-description)  
-- [Requirements](#requirements)  
-- [Installation](#installation)  
-- [Configuration](#configuration)  
-- [Project Structure](#project-structure)  
-- [Running Tests](#running-tests)  
-- [CI / GitHub Actions](#ci--github-actions)  
-- [Reporting](#reporting)  
-- [Extension & Maintenance](#extension--maintenance)  
+  * **DOCX**: extracts editable text and embeds page images to preserve layout
+  * **XLSX**: exports each line of text into a separate Excel row
+  * **JPG/PNG**: renders PDF pages into images with configurable DPI
+* **PDF Viewing & Editing**: open, annotate, highlight, strike-through text and print using built-in PDF viewer
+* **App Settings**:
 
-### Project Description
-
-This project demonstrates building an extensible REST-API test framework with:
-
-- **HTTP Client** (`src/client.py`):  
-  Methods `get`, `post`, `put`, `delete` and JSON Schema validation (`src/schemas/*.json`).  
-- **Database Access** (`src/db.py`):  
-  SQLAlchemy integration, fixtures for schema setup and data sync.  
-- **Dynamic Test Data** (`tests/data.py`):  
-  Factory functions `make_user()`, `make_order()`.  
-- **Constants** (`tests/constants.py`):  
-  Key response prefixes and strings.  
-- **Tests** (`tests/`):  
-  Positive and negative scenarios for `/pet`, `/user`, `/store/order`.  
-- **Allure** for rich HTML reporting.
-
-### Requirements
-
-- Python 3.8+  
-- Docker (Petstore API & Postgres)  
-- Git  
-
-### Installation
-
-```bash
-git clone https://github.com/RomanRyabinkin/petstore-rest-automation-python.git
-cd petstore-rest-automation-python
-python -m venv .venv
-source .venv/bin/activate      # Linux/macOS
-.\.venv\Scripts\Activate.ps1   # Windows PowerShell
-pip install -r requirements.txt
-```
-
-> **requirements.txt** includes:  
-> `pytest`, `pytest-cov`, `allure-pytest`, `requests`, `PyYAML`, `jsonschema`, `SQLAlchemy`, `psycopg2-binary`
-
-### Configuration
-
-Edit **config.yaml**:
-
-```yaml
-api:
-  base_url: http://localhost:8080/api/v3
-  timeout: 5
-
-db:
-  url: postgresql://test:test@localhost:5432/petstore
-```
-
-You can override `api.base_url` with `--base-url` pytest option.
-
-### Project Structure
-
-```
-petstore-rest-automation-python/
-├── .github/                   # CI/CD workflows
-│   └── workflows/ci.yml
-├── .venv/                     # virtualenv
-├── src/
-│   ├── client.py              # HTTP client + JSON Schema
-│   ├── db.py                  # SQLAlchemy + DB access
-│   └── schemas/               # JSON Schema files
-├── tests/
-│   ├── data.py                # make_user, make_order factories
-│   ├── constants.py           # key prefixes (e.g. LOGIN_SUCCESS_PREFIX)
-│   ├── conftest.py            # fixtures: wait_for_api, new_pet, init_db_schema
-│   ├── test_pet_crud.py       # CRUD & negative tests for /pet
-│   ├── test_pet_negative.py   # extended negative /pet scenarios
-│   ├── test_user_crud.py      # CRUD & extra tests for /user
-│   ├── test_user_negative.py  # negative /user scenarios
-│   ├── test_store_order.py    # CRUD & negative for /store/order
-│   └── test_store_negative.py # negative /store/order scenarios
-├── config.yaml                # API & DB settings
-├── requirements.txt           # dependencies
-├── pytest.ini                 # pytest settings & markers
-└── README.md                  # this file
-```
-
-### Running Tests
-
-1. Start services:
-
-   ```bash
-   docker run -d --name petstore -p 8080:8080 swaggerapi/petstore3:unstable
-   docker run -d --name petstore-db      -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test      -e POSTGRES_DB=petstore -p 5432:5432 postgres:15
-   ```
-
-2. Run tests & collect Allure results:
-
-   ```bash
-   pytest --maxfail=1 -q           --cov=src --cov-report=xml           --alluredir=allure-results
-   ```
-
-### CI / GitHub Actions
-
-Workflow at `.github/workflows/ci.yml`:
-
-- Triggers on **all branches** (`push: branches: ['**']`) and PRs to **main**.  
-- Spins up Postgres and Petstore containers.  
-- Installs dependencies including `allure-pytest`.  
-- Runs `pytest` with coverage & Allure result directory.  
-- Uploads Codecov report and Allure artifacts via `actions/upload-artifact@v4`.
-
-### Reporting
-
-- **Coverage**: `coverage.xml` → Codecov  
-- **Allure**: HTML report from `allure-results/`:
-
-  ```bash
-  allure serve allure-results
-  ```
-
-### Extension & Maintenance
-
-- Add unit tests & mocks for `client` and `db`.  
-- Support multiple environments (staging, prod) via environment variables.  
-- Integrate Slack/Teams notifications on pipeline status.  
-- Provide a `docker-compose.yml` for full local setup of API + DB.
+  * Language selection (English/Russian)
+  * Theme selection (Light/Dark/System Default)
+* **File Management**: save converted files to the device’s Downloads folder via MediaStore API
+* **Internationalization**: all UI strings available in Russian and English, runtime locale switching
 
 ---
 
-**Author: Роман Рябинкин**
+### Project Structure
+
+* **ui/** — Jetpack Compose screens and navigation:
+
+  * `AppRoot`, `HomeScreen`, `ActionsScreen`, `FormatSelectionScreen`, `FilePickerScreen`, `PdfConvertScreen`, `PdfEditorScreen`, `SettingsScreen`, `AboutScreen`
+* **converter/** — `PdfConverter` interface and `RealPdfConverter` implementation (PDFBox + Apache POI)
+* **util/** — utilities for URI copying, filename retrieval, saving to Downloads
+* **components/** — reusable Compose components: `FilePickerButton`, `AppDrawer`, `TopBar`
+* **core/** — navigation routes definition (`Screen` sealed class)
+* **data/** — settings repository (DataStore Preferences) for language and theme
+
+---
+
+### Technologies & Libraries
+
+* Kotlin & Coroutines
+* Jetpack Compose & Material3
+* Navigation-Compose
+* PDFBox Android (PDF parsing)
+* Apache POI (XWPF, XSSF)
+* PdfiumCore (PDF ➔ Bitmap rendering)
+* DataStore Preferences
+* AndroidX Material3
+* Multidex support
+
+---
+
+### Quick Start
+
+**Requirements:**
+
+* Android Studio Arctic Fox or later
+* JDK 11
+* Emulator or device with Android 8.0 (API 26+)
+
+**Build & Run:**
+
+```bash
+git clone https://github.com/yourusername/FlexyDoc.git
+cd FlexyDoc
+```
+
+1. Open the project in Android Studio
+2. Sync Gradle and build
+3. Run on emulator or physical device
+
+**Testing:**
+
+* Unit tests: `./gradlew test`
+* Instrumented tests: `./gradlew connectedAndroidTest`
 
 ---
 
 ## 🇷🇺 Русский
 
-Фреймворк для автоматизационного тестирования Swagger Petstore REST API на Python с использованием:
+> **Ветка по умолчанию**: `master` (весь актуальный код и документация находятся в ветке `master`).
 
-* `pytest` + `allure-pytest`  
-* `requests`  
-* `SQLAlchemy`  
-* `jsonschema`
+**FlexyDoc** — это мобильный Android-клиент для просмотра, редактирования и конвертации PDF-документов. Приложение поддерживает:
 
-### Содержание
+* **Конвертацию PDF** в различные форматы:
 
-* [Описание проекта](#описание-проекта)  
-* [Требования](#требования)  
-* [Установка](#установка)  
-* [Конфигурация](#конфигурация)  
-* [Структура проекта](#структура-проекта)  
-* [Запуск тестов](#запуск-тестов)  
-* [CI / GitHub Actions](#ci--github-actions)  
-* [Отчётность](#отчётность)  
-* [Расширение и поддержка](#расширение-и-поддержка)  
+  * **DOCX**: извлечение текста и вставка изображений страниц для сохранения макета
+  * **XLSX**: экспорт каждой строки текста в отдельную строку Excel
+  * **JPG/PNG**: рендеринг страниц PDF в изображения с настраиваемым DPI
+* **Просмотр и редактирование PDF**: открытие, аннотации, выделение, зачёркивание текста и печать с помощью встроенного PDF-вьювера
+* **Настройки приложения**:
 
-### Описание проекта
+  * Выбор языка интерфейса (Русский/Английский)
+  * Выбор темы (Светлая/Тёмная/System Default)
+* **Управление файлами**: сохранение результатов конвертации в папку «Загрузки» через MediaStore API
+* **Мультиязычность**: все строки в ресурсах на русском и английском, поддержка смены локали на ходу
 
-Проект демонстрирует построение расширяемого REST-фреймворка с:
+---
 
-* **HTTP-клиентом** (`src/client.py`): методы `get`, `post`, `put`, `delete`, валидация JSON-ответов по схемам (`src/schemas/*.json`).  
-* **Доступом к БД** (`src/db.py`): SQLAlchemy, фикстуры для инициализации схемы и синхронизации данных.  
-* **Фабриками тестовых данных** (`tests/data.py`): `make_user()`, `make_order()`.  
-* **Константами** (`tests/constants.py`): ключевые префиксы ответов (например, `LOGIN_SUCCESS_PREFIX`).  
-* **Тестами** (`tests/`): позитивные и негативные сценарии для `/pet`, `/user`, `/store/order`.  
-* **Allure** для генерации удобного HTML-отчёта.
+## Структура проекта
+
+* **ui/** — экраны на Jetpack Compose и навигация:
+
+  * `AppRoot`, `HomeScreen`, `ActionsScreen`, `FormatSelectionScreen`, `FilePickerScreen`, `PdfConvertScreen`, `PdfEditorScreen`, `SettingsScreen`, `AboutScreen`
+* **converter/** — интерфейс `PdfConverter` и реализация `RealPdfConverter` (PDFBox + Apache POI)
+* **util/** — утилиты для копирования URI в кэш, получения имени файла и сохранения в «Загрузки»
+* **components/** — переиспользуемые Compose-компоненты: `FilePickerButton`, `AppDrawer`, `TopBar`
+* **core/** — определение маршрутов (sealed-класс `Screen`)
+* **data/** — репозиторий настроек (DataStore Preferences) для языка и темы
+
+---
+
+## Технологии и библиотеки
+
+* Kotlin, Coroutines
+* Jetpack Compose & Material3
+* Navigation-Compose
+* PDFBox Android (парсинг PDF)
+* Apache POI (XWPF, XSSF)
+* PdfiumCore (рендеринг PDF в Bitmap)
+* DataStore Preferences
+* AndroidX Material3
+* Multidex support
+
+---
+
+## Быстрый старт
 
 ### Требования
 
-* Python 3.8+  
-* Docker (Petstore API и Postgres)  
-* Git  
+* Android Studio Arctic Fox или новее
+* JDK 11
+* Эмулятор или устройство с Android 8.0 (API 26+)
 
-### Установка
+### Сборка и запуск
 
-```bash
-git clone https://github.com/RomanRyabinkin/petstore-rest-automation-python.git
-cd petstore-rest-automation-python
-python -m venv .venv
-source .venv/bin/activate      # Linux/macOS
-.\.venv\Scripts\Activate.ps1   # Windows PowerShell
-pip install -r requirements.txt
-```
+1. Клонируйте репозиторий:
 
-### Конфигурация
+   ```bash
+   git clone https://github.com/yourusername/FlexyDoc.git
+   cd FlexyDoc
+   ```
+2. Откройте проект в Android Studio.
+3. Дождитесь синхронизации Gradle и выполните сборку.
+4. Запустите приложение на эмуляторе или реальном устройстве.
 
-```yaml
-api:
-  base_url: http://localhost:8080/api/v3
-  timeout: 5
+### Тестирование
 
-db:
-  url: postgresql://test:test@localhost:5432/petstore
-```
+* **Unit tests**: `./gradlew test`
+* **Instrumented tests**: `./gradlew connectedAndroidTest`
 
-### Подготовка и запуск тестов
+---
 
-```bash
-docker run -d --name petstore -p 8080:8080 swaggerapi/petstore3:unstable
-docker run -d --name petstore-db   -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test   -e POSTGRES_DB=petstore -p 5432:5432 postgres:15
+## Как пользоваться
 
-pytest --maxfail=1 -q --cov=src --cov-report=xml --alluredir=allure-results
-```
+1. **Домашний экран**: выбрать категорию (PDF, Word, Image)
+2. **Экран действий**: выбрать операцию (Конвертация, Редактирование, Аннотации и т.д.)
+3. **Выбор формата** (при конвертации): указать целевой формат
+4. **Выбор файла**: через системный диалог выбрать PDF
+5. **Конвертация**: нажать «Начать конвертацию», наблюдать прогресс и получить уведомление о сохранении
+6. **Просмотр/редактирование**: открыть PDF для аннотаций, выделений или печати
 
-### CI и отчёты
+---
 
-CI настроен в `.github/workflows/ci.yml`, использует GitHub Actions для запуска тестов, загрузки отчётов в Codecov и Allure.
 
-**Автор: Роман Рябинкин**
+## Лицензия
+
+MIT License (см. файл LICENSE)
 
