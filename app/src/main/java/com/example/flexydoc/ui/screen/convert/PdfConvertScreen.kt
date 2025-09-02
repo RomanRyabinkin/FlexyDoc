@@ -1,6 +1,7 @@
 package com.example.flexydoc.ui.screen.convert
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
@@ -38,6 +39,7 @@ import com.example.flexydoc.converter.PdfConverter
 import com.example.flexydoc.converter.RealPdfConverter
 import com.example.flexydoc.ui.components.FilePickerButton
 import com.example.flexydoc.ui.screen.formatselection.PdfFormat
+import com.example.flexydoc.util.saveToDownloads
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,17 +82,33 @@ fun PdfConvertScreen(
                         scope.launch {
                             isConverting = true
                             progress = 0f
-                            converter.convert(
+                            val outFile = converter.convert(
                                 context     = context,
                                 sourceUri   = src,
                                 targetFormat= format
                             ) { pct ->
                                 progress = pct
                             }
+                            val mime = when (format) {
+                                PdfFormat.DOCX -> "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                PdfFormat.XLSX -> "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                PdfFormat.JPG  -> "image/jpeg"
+                                PdfFormat.PNG  -> "image/png"
+                            }
+                            val saved = context.saveToDownloads(outFile, mime)
                             isConverting = false
                             pdfUri       = null
                             progress     = 0f
-                            // здесь можно показать Snackbar/Toast в будущем
+                            val messageRes = if (saved)
+                                R.string.toast_saved_to_downloads
+                            else
+                                R.string.toast_save_fail
+                            Toast.makeText(
+                                context,
+                                context.getString(messageRes, outFile.name),
+                                Toast.LENGTH_SHORT
+                            )
+                                .show()
                         }
                     }
                 },

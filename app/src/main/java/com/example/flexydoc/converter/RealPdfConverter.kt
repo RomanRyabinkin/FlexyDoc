@@ -21,6 +21,10 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument
 import org.apache.poi.xwpf.usermodel.XWPFParagraph
 import java.io.File
 import java.io.FileOutputStream
+import com.tom_roush.pdfbox.rendering.PDFRenderer
+import org.apache.poi.util.Units
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 
 /**
  * Реализация конвертера PDF в различные целевые форматы.
@@ -87,34 +91,48 @@ class RealPdfConverter : PdfConverter {
 
             // === Конвертация в DOCX ===
             PdfFormat.DOCX -> {
-                onProgress(0.5f)
+                onProgress(0.1f)
                 PDDocument.load(pdfFile).use { pd ->
-                    val text = PDFTextStripper().getText(pd)
+                    val renderer = PDFRenderer(pd)
+                    // Новая книга DOCX
                     XWPFDocument().use { docx ->
-                        docx.createParagraph()
-                            .createRun()
-                            .setText(text)
+                        val stripper = PDFTextStripper()
 
+                        for (page in 0 until pd.numberOfPages) {
+                            stripper.startPage = page + 1
+                            stripper.endPage   = page + 1
+                            val pageText = stripper.getText(pd).trim()
+                            if (pageText.isNotEmpty()) {
+                                val p = docx.createParagraph()
+                                val r = p.createRun()
+                                r.setText(pageText)
+                            }
+                            onProgress(0.1f + (page + 0.5f) / pd.numberOfPages * 0.8f)
+                            val bmp: Bitmap = renderer.renderImageWithDPI(page, 150f)
+                            val baos = ByteArrayOutputStream().also { out ->
+                                bmp.compress(Bitmap.CompressFormat.PNG, 100, out)
+                            }
+                            val picData = baos.toByteArray()
+
+                            val wEmu = Units.pixelToEMU(bmp.width)
+                            val hEmu = Units.pixelToEMU(bmp.height)
+
+                            val picPara = docx.createParagraph()
+                            val picRun  = picPara.createRun()
+                            picRun.addPicture(
+                                ByteArrayInputStream(picData),
+                                XWPFDocument.PICTURE_TYPE_PNG,
+                                "page${page + 1}.png",
+                                wEmu,
+                                hEmu
+                            )
+
+                            onProgress(0.1f + (page + 1f) / pd.numberOfPages * 0.8f)
+                        }
                         val outFile = File(outDir, "$baseName.docx")
                         FileOutputStream(outFile).use { fos ->
                             docx.write(fos)
                         }
-                        onProgress(0.9f)
-
-                        val saved = context.saveToDownloads(
-                            outFile,
-                            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                        )
-
-                        withContext(Dispatchers.Main) {
-                            if (saved) {
-                                val toastMessage = context.getString(R.string.toast_saved_to_downloads, outFile.name)
-                                Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show()
-                            } else {
-                                Toast.makeText(context, "Не удалось сохранить файл", Toast.LENGTH_LONG).show()
-                            }
-                        }
-
                         onProgress(1f)
                         return@withContext outFile
                     }
